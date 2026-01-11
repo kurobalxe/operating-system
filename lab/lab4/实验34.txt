@@ -1,0 +1,86 @@
+实验四
+# 1. 进入模块目录
+cd module
+
+# 2. 编译模块
+make
+ls -l *.ko
+
+# 3. 加载模块（带参数）
+sudo insmod hello.ko mytest=200
+
+# 4. 查看内核日志
+sudo dmesg | tail -3
+
+# 5. 查看模块信息
+lsmod | grep hello
+modinfo hello.ko
+
+# 6. 卸载模块
+sudo rmmod hello
+sudo dmesg | tail -3
+
+
+
+# 1. 进入驱动目录
+cd ../driver
+
+# 2. 编译驱动
+make
+ls -l *.ko
+
+# 3. 加载驱动
+sudo insmod sumdev.ko
+
+# 4. 查看内核日志和设备节点
+sudo dmesg | tail -3
+ls -l /dev/sumdev
+
+# 5. 进入测试目录
+cd ../test
+
+# 6. 编译测试程序（如果还没编译）
+gcc -o test_write test_write.c
+gcc -o test_read test_read.c
+
+# 7. 演示功能测试
+echo "=== 测试1：正常情况（两个数求和）==="
+sudo ./test_write 10
+sudo ./test_write 20
+sudo ./test_read
+
+echo "=== 测试2：边界情况（只有一个数）==="
+sudo rmmod sumdev
+sudo insmod ../driver/sumdev.ko
+sudo ./test_write 5
+sudo ./test_read
+
+echo "=== 测试3：没有数据时读取 ==="
+sudo rmmod sumdev
+sudo insmod ../driver/sumdev.ko
+sudo ./test_read
+
+# 8. 实时查看内核日志（可选）
+# 新开一个终端窗口：
+# sudo dmesg -w
+
+
+实验三
+./page_replace
+
+./page_replace -f 4 -m 2 -a fifo
+./page_replace -f 4 -m 2 -a lru
+./page_replace -f 4 -m 2 -a opt
+
+sudo ./pagemap_demo
+
+sudo sh -c 'echo 0 > /proc/sys/kernel/randomize_va_space'
+
+# 启动两个实例（分别在两个终端或后台）
+sudo ./vtop -m 1 &
+sudo ./vtop -m 1
+
+sudo sh -c 'echo 2 > /proc/sys/kernel/randomize_va_space'
+
+sudo ./vtop -m 2 &
+sudo ./vtop -m 2
